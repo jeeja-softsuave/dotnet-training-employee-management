@@ -95,8 +95,7 @@ internal sealed class ConsoleUi(EmployeeService service, TextReader input, TextW
         var isContract = ReadChoice("Type (F = full-time, C = contract)", "F", "C") == "C";
         var salary = ReadDecimal("Annual salary", 0.01m, Employee.MaxSalary);
         var hireDate = ReadDate("Hire date (yyyy-MM-dd, blank = today)", DateOnly.FromDateTime(DateTime.Today));
-        PrintDepartments();
-        var departmentId = ReadInt("Department id", 1, int.MaxValue);
+        var departmentId = ReadDepartmentId();
         var email = ReadOptional("Email (optional)");
 
         var id = service.NextEmployeeId();
@@ -117,8 +116,7 @@ internal sealed class ConsoleUi(EmployeeService service, TextReader input, TextW
 
     private void FilterByDepartment()
     {
-        PrintDepartments();
-        var departmentId = ReadInt("Department id", 1, int.MaxValue);
+        var departmentId = ReadDepartmentId();
         PrintEmployees(service.GetAllEmployees().InDepartment(departmentId).ToList());
     }
 
@@ -237,6 +235,18 @@ internal sealed class ConsoleUi(EmployeeService service, TextReader input, TextW
             if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value) && value >= min && value <= max)
                 return value;
             output.WriteLine($"  Please enter a whole number between {min} and {max}.");
+        }
+    }
+
+    private int ReadDepartmentId()
+    {
+        PrintDepartments();
+        while (true)
+        {
+            var id = ReadInt("Department id", 1, int.MaxValue);
+            if (service.GetAllDepartments().Any(d => d.Id == id))
+                return id;
+            output.WriteLine($"  Department {id} does not exist.");
         }
     }
 
