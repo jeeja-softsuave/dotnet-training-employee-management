@@ -20,7 +20,8 @@ public readonly record struct SalaryRange
     public decimal Min { get; }
     public decimal Max { get; }
 
-    public bool Contains(decimal salary) => salary >= Min && salary < Max;
+    // DEF-001 fix: upper bound was exclusive (salary < Max). Both bounds are inclusive by contract.
+    public bool Contains(decimal salary) => salary >= Min && salary <= Max;
 
     public override string ToString() => $"{Min:N2} - {Max:N2}";
 }

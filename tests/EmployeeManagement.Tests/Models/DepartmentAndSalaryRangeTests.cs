@@ -68,6 +68,25 @@ public class SalaryRangeTests
         Assert.True(range.Contains(10_000m));
     }
 
+    // Regression test for defect DEF-001: the upper bound was exclusive (salary < Max),
+    // so filtering 50,000-80,000 left out employees earning exactly 80,000.
+    [Fact]
+    public void Contains_ValueEqualToMax_ReturnsTrue()
+    {
+        var range = new SalaryRange(10_000m, 20_000m);
+
+        Assert.True(range.Contains(20_000m));
+    }
+
+    // Regression test for DEF-001: a single-value range (Min == Max) must match that value.
+    [Fact]
+    public void Contains_MinEqualsMax_MatchesExactValue()
+    {
+        var range = new SalaryRange(80_000m, 80_000m);
+
+        Assert.True(range.Contains(80_000m));
+    }
+
     [Fact]
     public void Copy_IsIndependentValue()
     {

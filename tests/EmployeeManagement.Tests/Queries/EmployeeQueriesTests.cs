@@ -42,6 +42,15 @@ public class EmployeeQueriesTests
         Assert.Equal([2, 3, 4], Ids(result));
     }
 
+    // Regression test for DEF-001 at the query level: Bob and Dan earn exactly 80,000.
+    [Fact]
+    public void WithSalaryIn_EmployeeEarningExactlyMax_IsIncluded()
+    {
+        var result = _employees.WithSalaryIn(new SalaryRange(50_000m, 80_000m));
+
+        Assert.Equal([2, 3, 4], Ids(result));
+    }
+
     // Q3
     [Theory]
     [InlineData("alice", new[] { 1 })]
