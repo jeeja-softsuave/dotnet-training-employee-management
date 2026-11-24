@@ -1,0 +1,46 @@
+Server console log from the demo run (Development, simple formatter, scopes on).
+Every line carries the CorrelationId scope. EF Core parameter values are hidden ('?') because sensitive-data logging is off.
+
+11.53.56 info: EmployeeManagement.Infrastructure.Persistence.DatabaseInitializer[0] Database migrations applied
+11.53.56 info: EmployeeManagement.Infrastructure.Persistence.DatabaseInitializer[0] Seeded 4 departments and sample employees
+11.53.56 info: EmployeeManagement.Infrastructure.Persistence.DatabaseInitializer[0] Seeded demo users admin, hr and viewer
+11.53.57 info: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:87a946f500474b8e9b72bca6d97aae27 HTTP GET /health responded 200 in 33.9 ms
+11.54.15 info: EmployeeManagement.Application.Services.AuthService[0]=> CorrelationId:f947f8496efe4024a650ebb145f0e2f7 User hr signed in with role HR
+11.54.15 info: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:f947f8496efe4024a650ebb145f0e2f7 HTTP POST /api/auth/login responded 200 in 371.3 ms
+11.54.15 info: EmployeeManagement.Application.Services.AuthService[0]=> CorrelationId:9cdba653b62a4cc79fd9cf362242b5ec User admin signed in with role Admin
+11.54.15 info: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:9cdba653b62a4cc79fd9cf362242b5ec HTTP POST /api/auth/login responded 200 in 170.5 ms
+11.54.15 info: EmployeeManagement.Application.Services.AuthService[0]=> CorrelationId:e75230ee056a430facdef5efcc06b0c0 User hr signed in with role HR
+11.54.15 info: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:e75230ee056a430facdef5efcc06b0c0 HTTP POST /api/auth/login responded 200 in 81.4 ms
+11.54.16 info: EmployeeManagement.Application.Services.AuthService[0]=> CorrelationId:d91093564908464a967dcadff88163de User viewer signed in with role Viewer
+11.54.16 info: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:d91093564908464a967dcadff88163de HTTP POST /api/auth/login responded 200 in 85.5 ms
+11.54.16 warn: EmployeeManagement.Application.Services.AuthService[0]=> CorrelationId:b20efeb7448443828f9caf4a969ec691 Failed login for user hr: wrong password
+11.54.16 warn: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:b20efeb7448443828f9caf4a969ec691 HTTP POST /api/auth/login responded 401 in 113.3 ms
+11.54.16 warn: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:3c837f64ae96440aa150cf9906d0b74e HTTP GET /api/employees responded 401 in 12.9 ms
+11.54.16 warn: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:474633c4738241d9ab99fadd5474e2d8 HTTP GET /api/employees responded 401 in 55.1 ms
+11.54.17 info: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:e32a44923fcf47d39c3bc75b0953b43d HTTP GET /api/employees responded 200 in 248.6 ms
+11.54.17 warn: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:c607bb3900af44fb97c46ef0c36715ab HTTP POST /api/employees responded 403 in 6.3 ms
+11.54.17 info: EmployeeManagement.Application.Services.EmployeeService[0]=> CorrelationId:c706fb3548564935a215da2eb4c59574 Employee 11 (FullTime) created in department 3 by hr
+11.54.17 info: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:c706fb3548564935a215da2eb4c59574 HTTP POST /api/employees responded 201 in 129.9 ms
+11.54.17 warn: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:d9cefa6845914dca9ff682bcbe154e2a HTTP POST /api/employees responded 400 in 14.6 ms
+11.54.17 warn: EmployeeManagement.Api.ErrorHandling.GlobalExceptionHandler[0]=> CorrelationId:edb3986e37b44355a892470300eb5fe8 BusinessRuleException for POST /api/employees: Department 99 does not exist.
+11.54.17 warn: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:edb3986e37b44355a892470300eb5fe8 HTTP POST /api/employees responded 400 in 21.1 ms
+11.54.17 warn: EmployeeManagement.Api.ErrorHandling.GlobalExceptionHandler[0]=> CorrelationId:eae4062dcc474010af210a1039989806 ConflictException for POST /api/employees: Another employee already uses the email 'asha.menon@example.com'.
+11.54.17 warn: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:eae4062dcc474010af210a1039989806 HTTP POST /api/employees responded 409 in 14.6 ms
+11.54.18 info: EmployeeManagement.Application.Services.EmployeeService[0]=> CorrelationId:fd8bc23176ed4239ad5f8cea28c040bd Employee 11 replaced (PUT) by hr
+11.54.18 info: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:fd8bc23176ed4239ad5f8cea28c040bd HTTP PUT /api/employees/11 responded 204 in 72.6 ms
+11.54.18 info: EmployeeManagement.Application.Services.EmployeeService[0]=> CorrelationId:df7b9719b7b146d8a45a45f3b94dba14 Employee 11 patched by hr
+11.54.18 info: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:df7b9719b7b146d8a45a45f3b94dba14 HTTP PATCH /api/employees/11 responded 200 in 52.8 ms
+11.54.18 warn: EmployeeManagement.Application.Services.EmployeeService[0]=> CorrelationId:c2989df2e22e445baa4dc9cef3861156 User hr tried to approve a 30% raise for employee 11 (limit 20%)
+11.54.18 warn: EmployeeManagement.Api.ErrorHandling.GlobalExceptionHandler[0]=> CorrelationId:c2989df2e22e445baa4dc9cef3861156 ForbiddenException for POST /api/employees/11/raise: You can approve raises up to 20%. A 30% raise needs an Admin.
+11.54.18 warn: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:c2989df2e22e445baa4dc9cef3861156 HTTP POST /api/employees/11/raise responded 403 in 18.5 ms
+11.54.18 info: EmployeeManagement.Application.Services.EmployeeService[0]=> CorrelationId:baf5a6d661824f46aa55b1df492dd664 Employee 11 salary 72000 -> 93600.0 approved by admin
+11.54.18 info: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:baf5a6d661824f46aa55b1df492dd664 HTTP POST /api/employees/11/raise responded 200 in 23.6 ms
+11.54.18 warn: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:baa48ff5a42c4a13bab60f468f1ee86a HTTP DELETE /api/employees/11 responded 403 in 0.7 ms
+11.54.18 info: EmployeeManagement.Application.Services.EmployeeService[0]=> CorrelationId:f6c870112cf1437984f3a1108c5096b6 Employee 11 deleted by admin
+11.54.18 info: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:f6c870112cf1437984f3a1108c5096b6 HTTP DELETE /api/employees/11 responded 204 in 46.3 ms
+11.54.19 warn: EmployeeManagement.Api.ErrorHandling.GlobalExceptionHandler[0]=> CorrelationId:demo-req-404 NotFoundException for GET /api/employees/11: Employee with id 11 was not found.
+11.54.19 warn: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:demo-req-404 HTTP GET /api/employees/11 responded 404 in 15.5 ms
+11.54.19 info: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:5612e4a50ec04fea9b979de183833e74 HTTP GET /api/departments responded 200 in 28.5 ms
+11.54.19 warn: EmployeeManagement.Api.ErrorHandling.GlobalExceptionHandler[0]=> CorrelationId:08037932e1f24590b1c2d981f684b470 ConflictException for DELETE /api/departments/1: Department 'Engineering' still has 5 employee(s). Move or remove them first.
+11.54.19 warn: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:08037932e1f24590b1c2d981f684b470 HTTP DELETE /api/departments/1 responded 409 in 29.7 ms
+11.54.19 info: EmployeeManagement.Api.Middleware.RequestLoggingMiddleware[0]=> CorrelationId:4b711fe1efde469198dfc194a98528c4 HTTP GET /openapi/v1.json responded 200 in 273.2 ms
