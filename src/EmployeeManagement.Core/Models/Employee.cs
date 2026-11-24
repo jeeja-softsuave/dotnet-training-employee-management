@@ -17,8 +17,9 @@ public abstract class Employee
 
     protected Employee(int id, string name, decimal salary, DateOnly hireDate, int departmentId, string? email = null)
     {
-        if (id <= 0)
-            throw new ArgumentOutOfRangeException(nameof(id), id, "Employee id must be a positive number.");
+        // 0 = not saved yet: the database assigns the id on insert (Week 2, EF Core).
+        if (id < 0)
+            throw new ArgumentOutOfRangeException(nameof(id), id, "Employee id cannot be negative.");
         if (hireDate == default)
             throw new ArgumentException("Hire date is required.", nameof(hireDate));
 
@@ -71,6 +72,12 @@ public abstract class Employee
         }
     }
 
+    /// <summary>
+    /// Navigation property for EF Core (Week 2). Null until loaded with Include(...).
+    /// The relationship itself is defined by <see cref="DepartmentId"/>.
+    /// </summary>
+    public Department? Department { get; private set; }
+
     /// <summary>Nullable reference type: an employee may not have an email address yet.</summary>
     public string? Email { get; set; }
 
@@ -87,6 +94,12 @@ public abstract class Employee
 
         Salary = Math.Round(Salary * (1 + percentage / 100m), 2, MidpointRounding.AwayFromZero);
     }
+
+    /// <summary>
+    /// Sets a corrected salary (e.g. an HR data fix through PUT). Same validation as the constructor.
+    /// Raises still go through <see cref="GiveRaise"/>.
+    /// </summary>
+    public void ChangeSalary(decimal newSalary) => Salary = newSalary;
 
     /// <summary>Completed years of service on <paramref name="asOf"/>. Takes the date as a parameter so tests are deterministic.</summary>
     public int YearsOfService(DateOnly asOf)

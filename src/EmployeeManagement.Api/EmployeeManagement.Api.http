@@ -1,0 +1,241 @@
+### Employee Management API: example requests (success AND failure cases)
+### Run in VS Code (REST Client extension) or Visual Studio / Rider (.http support).
+### 1. Start the API:  dotnet run --project src/EmployeeManagement.Api
+### 2. Set @password below to the demo password you stored with dotnet user-secrets (see README).
+### 3. Run the three login requests first; the tokens are captured automatically.
+
+@baseUrl = http://localhost:5200
+@password = change-me
+
+#############################################################
+# AUTH
+#############################################################
+
+# @name loginAdmin
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{ "userName": "admin", "password": "{{password}}" }
+
+###
+
+# @name loginHr
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{ "userName": "hr", "password": "{{password}}" }
+
+###
+
+# @name loginViewer
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{ "userName": "viewer", "password": "{{password}}" }
+
+###
+
+@adminToken = {{loginAdmin.response.body.accessToken}}
+@hrToken = {{loginHr.response.body.accessToken}}
+@viewerToken = {{loginViewer.response.body.accessToken}}
+
+### FAIL 401: wrong password (same message as unknown user)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{ "userName": "hr", "password": "wrong-password" }
+
+### FAIL 400: missing fields
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{ }
+
+### 200: who am I (claims in the token)
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{viewerToken}}
+
+#############################################################
+# EMPLOYEES: read (any signed-in user)
+#############################################################
+
+### FAIL 401: no token
+GET {{baseUrl}}/api/employees
+
+### FAIL 401: invalid token
+GET {{baseUrl}}/api/employees
+Authorization: Bearer not.a.real-token
+
+### 200: first page (defaults: page 1, 10 per page, sorted by id)
+GET {{baseUrl}}/api/employees
+Authorization: Bearer {{viewerToken}}
+
+### 200: filter + sort + page
+GET {{baseUrl}}/api/employees?departmentId=1&type=FullTime&sortBy=salary&sortDirection=desc&page=1&pageSize=3
+Authorization: Bearer {{viewerToken}}
+
+### 200: salary range (both bounds inclusive) + search on name/email
+GET {{baseUrl}}/api/employees?minSalary=60000&maxSalary=72000&search=a
+Authorization: Bearer {{viewerToken}}
+
+### FAIL 400: invalid query (pageSize too big, unknown sort field, min > max)
+GET {{baseUrl}}/api/employees?pageSize=500&sortBy=password&minSalary=9&maxSalary=1
+Authorization: Bearer {{viewerToken}}
+
+### 200: one employee
+GET {{baseUrl}}/api/employees/1
+Authorization: Bearer {{viewerToken}}
+
+### FAIL 404: unknown id (note the correlationId in the body and X-Correlation-Id header)
+GET {{baseUrl}}/api/employees/9999
+Authorization: Bearer {{viewerToken}}
+X-Correlation-Id: my-request-123
+
+#############################################################
+# EMPLOYEES: write (HR or Admin)
+#############################################################
+
+### FAIL 403: Viewer is signed in but not allowed to create
+POST {{baseUrl}}/api/employees
+Authorization: Bearer {{viewerToken}}
+Content-Type: application/json
+
+{ "name": "Viewer Attempt", "type": "FullTime", "salary": 50000, "hireDate": "2026-11-01", "departmentId": 1 }
+
+### 201 Created + Location header
+# @name created
+POST {{baseUrl}}/api/employees
+Authorization: Bearer {{hrToken}}
+Content-Type: application/json
+
+{
+  "name": "Kiran Shah",
+  "email": "kiran.shah@example.com",
+  "type": "FullTime",
+  "salary": 70000,
+  "hireDate": "2026-11-01",
+  "departmentId": 3
+}
+
+###
+
+@newId = {{created.response.body.id}}
+
+### 201: contract employee
+POST {{baseUrl}}/api/employees
+Authorization: Bearer {{hrToken}}
+Content-Type: application/json
+
+{ "name": "Omar Farooq", "type": "Contract", "salary": 40000, "hireDate": "2026-01-01", "departmentId": 2, "contractEndDate": "2026-12-31" }
+
+### FAIL 400: validation errors for several fields at once
+POST {{baseUrl}}/api/employees
+Authorization: Bearer {{hrToken}}
+Content-Type: application/json
+
+{ "name": "", "email": "not-an-email", "salary": 0, "departmentId": 0 }
+
+### FAIL 400: business rule (department does not exist)
+POST {{baseUrl}}/api/employees
+Authorization: Bearer {{hrToken}}
+Content-Type: application/json
+
+{ "name": "Lost Person", "type": "FullTime", "salary": 50000, "hireDate": "2026-11-01", "departmentId": 99 }
+
+### FAIL 409: email already used (case-insensitive)
+POST {{baseUrl}}/api/employees
+Authorization: Bearer {{hrToken}}
+Content-Type: application/json
+
+{ "name": "Asha Twin", "email": "ASHA.MENON@example.com", "type": "FullTime", "salary": 50000, "hireDate": "2026-11-01", "departmentId": 1 }
+
+### 204: PUT replaces all editable fields (email omitted -> removed)
+PUT {{baseUrl}}/api/employees/{{newId}}
+Authorization: Bearer {{hrToken}}
+Content-Type: application/json
+
+{ "name": "Kiran Shah", "salary": 72000, "departmentId": 1 }
+
+### 200: PATCH changes only what is sent
+PATCH {{baseUrl}}/api/employees/{{newId}}
+Authorization: Bearer {{hrToken}}
+Content-Type: application/json
+
+{ "email": "kiran.s@example.com" }
+
+### FAIL 400: PATCH with nothing to change
+PATCH {{baseUrl}}/api/employees/{{newId}}
+Authorization: Bearer {{hrToken}}
+Content-Type: application/json
+
+{ }
+
+### 200: HR raise within the 20% limit
+POST {{baseUrl}}/api/employees/{{newId}}/raise
+Authorization: Bearer {{hrToken}}
+Content-Type: application/json
+
+{ "percentage": 10 }
+
+### FAIL 403: HR raise above 20% (business rule)
+POST {{baseUrl}}/api/employees/{{newId}}/raise
+Authorization: Bearer {{hrToken}}
+Content-Type: application/json
+
+{ "percentage": 30 }
+
+### 200: Admin can approve a 30% raise
+POST {{baseUrl}}/api/employees/{{newId}}/raise
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "percentage": 30 }
+
+### FAIL 403: HR cannot delete
+DELETE {{baseUrl}}/api/employees/{{newId}}
+Authorization: Bearer {{hrToken}}
+
+### 204: Admin deletes
+DELETE {{baseUrl}}/api/employees/{{newId}}
+Authorization: Bearer {{adminToken}}
+
+### FAIL 404: already deleted
+DELETE {{baseUrl}}/api/employees/{{newId}}
+Authorization: Bearer {{adminToken}}
+
+#############################################################
+# DEPARTMENTS
+#############################################################
+
+### 200: public list with headcount (no token needed)
+GET {{baseUrl}}/api/departments
+
+### 200: summary (signed-in users; reuses the Week 1 LINQ query)
+GET {{baseUrl}}/api/departments/summary
+Authorization: Bearer {{viewerToken}}
+
+### 201: Admin creates a department
+# @name newDept
+POST {{baseUrl}}/api/departments
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "name": "Legal" }
+
+### FAIL 409: duplicate name
+POST {{baseUrl}}/api/departments
+Authorization: Bearer {{adminToken}}
+Content-Type: application/json
+
+{ "name": "legal" }
+
+### FAIL 409: department still has employees
+DELETE {{baseUrl}}/api/departments/1
+Authorization: Bearer {{adminToken}}
+
+### 204: delete the empty department
+DELETE {{baseUrl}}/api/departments/{{newDept.response.body.id}}
+Authorization: Bearer {{adminToken}}
+
+### Health check (no token)
+GET {{baseUrl}}/health

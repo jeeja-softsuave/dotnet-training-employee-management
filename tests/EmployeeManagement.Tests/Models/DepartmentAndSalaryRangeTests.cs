@@ -23,10 +23,16 @@ public class DepartmentTests
         Assert.Equal("Sales", department.Name);
     }
 
+    [Fact]
+    public void Constructor_ZeroId_IsAllowedForUnsavedDepartment()
+    {
+        Assert.Equal(0, new Department(0, "Sales").Id);
+    }
+
     [Theory]
-    [InlineData(0)]
     [InlineData(-1)]
-    public void Constructor_NonPositiveId_Throws(int id)
+    [InlineData(-10)]
+    public void Constructor_NegativeId_Throws(int id)
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => new Department(id, "Sales"));
     }

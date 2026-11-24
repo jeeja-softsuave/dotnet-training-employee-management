@@ -7,9 +7,10 @@ namespace EmployeeManagement.Core.Models;
 /// </summary>
 public sealed record Department(int Id, string Name)
 {
-    public int Id { get; } = Id > 0
+    // 0 = not saved yet: the database assigns the id on insert (Week 2, EF Core).
+    public int Id { get; } = Id >= 0
         ? Id
-        : throw new ArgumentOutOfRangeException(nameof(Id), Id, "Department id must be a positive number.");
+        : throw new ArgumentOutOfRangeException(nameof(Id), Id, "Department id cannot be negative.");
 
     public string Name { get; } = !string.IsNullOrWhiteSpace(Name)
         ? Name.Trim()

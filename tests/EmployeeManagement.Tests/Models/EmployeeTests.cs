@@ -168,11 +168,41 @@ public class EmployeeTests
     }
 
     [Theory]
-    [InlineData(0)]
+    [InlineData(-1)]
     [InlineData(-5)]
-    public void Constructor_NonPositiveId_Throws(int id)
+    public void Constructor_NegativeId_Throws(int id)
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => TestData.FullTime(id: id));
+    }
+
+    [Fact]
+    public void Constructor_ZeroId_IsAllowedForUnsavedEmployee()
+    {
+        // Week 2: id 0 means "not saved yet"; the database assigns the real id.
+        var employee = TestData.FullTime(id: 0);
+
+        Assert.Equal(0, employee.Id);
+    }
+
+    [Fact]
+    public void ChangeSalary_ValidValue_SetsSalary()
+    {
+        var employee = TestData.FullTime(salary: 50_000m);
+
+        employee.ChangeSalary(42_000m);
+
+        Assert.Equal(42_000m, employee.Salary);
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(10_000_000.01)]
+    public void ChangeSalary_OutOfRange_ThrowsAndLeavesSalaryUnchanged(decimal newSalary)
+    {
+        var employee = TestData.FullTime(salary: 50_000m);
+
+        Assert.Throws<ArgumentOutOfRangeException>(() => employee.ChangeSalary(newSalary));
+        Assert.Equal(50_000m, employee.Salary);
     }
 
     [Fact]
